@@ -38,7 +38,7 @@ def enviar_mensaje(cs, data):
     return numwrite
 
 
-def recibir_mensaje(cs,data):
+def recibir_mensaje(cs):
     """ Esta función recibe datos a través del socket cs
         Leemos la información que nos llega. recv() devuelve un string con los datos.
     """
