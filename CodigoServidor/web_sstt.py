@@ -65,7 +65,7 @@ def enviar_mensaje(cs, p, codigo):
     if codigo==200:
         path = p
     else:
-        path = str(codigo + ".html")
+        path = str(codigo) + ".html"
     f = open(path, "rb")
     tam = os.stat(path).st_size
     header = make_header(codigo, tam)
