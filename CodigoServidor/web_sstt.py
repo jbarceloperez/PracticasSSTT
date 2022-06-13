@@ -107,14 +107,16 @@ def process_web_request(cs, webroot):
             msg = recibir_mensaje(s)
             if len(msg)>0:
                 logger.debug("Client message: " + msg)
+                lineas = msg.splitlines()    # se divide el mensaje en líneas para que sea más cómodo de manejar
+                for l in lineas:
+                    print(l)
 
 
             
             sys.exit(0)
-            pass
+
         # Si es por timeout, se cierra el socket tras el período de persistencia.
         # NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
-
         else:
             logger.error("Timeout alcanzado.")
             cerrar_conexion(cs)
