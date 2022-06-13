@@ -5,6 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: archivo actual",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "-ip", "192.168.249.50",
+                "-p", "9000",
+                "-wb", "./"
+            ]   
+        },
+        {
             "name": "Python: Flask",
             "type": "python",
             "request": "launch",
