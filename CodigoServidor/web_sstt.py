@@ -149,7 +149,7 @@ def main():
         logger.info("Iniciar escucha infinita del servidor web (addr={},port={})".format(args.host, args.port))  # debug
         while(True):
             # se acepta una conexión
-            (conn, addr) = sock.accept()
+            conn, addr = sock.accept()
             logger.info("Petición entrante (addr="+addr+")")
             pid = os.fork()
             # tratamiento del fork:'
