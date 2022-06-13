@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from http.cookiejar import Cookie
 import socket
 import selectors    #https://docs.python.org/3/library/selectors.html
 import select
@@ -17,6 +18,7 @@ import logging      # Para imprimir logs
 
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
 TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
+KEEPALIVE_TIMEOUT = 25  # Timeout HTTP
 MAX_ACCESOS = 10
 
 # Extensiones admitidas (extension, name in HTTP)
@@ -29,48 +31,65 @@ logging.basicConfig(level=logging.INFO,
                     datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger()
 
+def make_header(codigo, tam):
+    '''Crea la cadena de texto con la cabecera de la respuesta en función del código de estado.
+    '''
+    aux = '\r\nDate: ' + datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT\r\n') + 'Server: web.rugbycartagena78.org\r\nConnection: Keep-Alive\r\nKeep-Alive: timeout=' + str(KEEPALIVE_TIMEOUT) + '\r\nContent-Length: ' + str(tam) + '\r\nContent-Type: text/html\r\n\r\n'
+    if codigo==200:     # OK
+        # TODO acordarse de las cookies
+        pass
+    elif codigo==404:   # NOT FOUND
+        logger.error("HTTP/1.1 404 NOT FOUND")
+        return 'HTTP/1.1 404 Not Found' + aux
+    elif codigo==403:   # FORBIDDEN
+        logger.error("HTTP/1.1 403 FORBIDDEN")
+        return 'HTTP/1.1 403 Forbidden' + aux
+    elif codigo==400:   # BAD REQUEST
+        logger.error("HTTP/1.1 400 BAD REQUEST")
+        return 'HTTP/1.1 400 Bad Request' + aux
+    elif codigo==405:   # METHOD NOT ALLOWED
+        logger.error("HTTP/1.1 405 METHOD NOT ALLOWED")
+        return "HTTP/1.1 405 Method Not Allowed" + aux
+    elif codigo==505:   # HTTP VERSION NOT SUPPORTED
+        logger.error("HTTP/1.1 505 VERSION NOT SUPPORTED")
+        return 'HTTP/1.1 505 Version Not Supported' + aux
+    else:
+        logger.error("Error al construir el mensaje a enviar por el socket: código no válido.")
+        return -1
 
-def enviar_mensaje(cs, data, codigo):
+def enviar_mensaje(cs, p, cookie, codigo):
     """ Esta función envía datos (data) a través del socket cs.
         Devuelve el número de bytes enviados.
     """
-    if codigo==405:
-        f = open("405.html", "rb")
-        tam = os.stat("405.html").st_size
-        header = "HTTP/1.1 405 Method Not Allowed\r\nDate: " + datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT\r\n') + "Server: web.rugbycartagena78.org\r\nConnection: Keep-Alive\r\nKeep-Alive: timeout=24\r\nContent-Length: " + str(tam) + "\r\nContent-Type: text/html\r\n\r\n"
-        logger.debug("Sending 405 message:\n" + header)
-        header = header.encode()
-        msg = f.read(BUFSIZE)   # se lee con un buffer de tamaño BUFSIZE
-        # se envia la cabecera + el contenido del archivo html
-        aux = header + msg
-        ret=0
-        # se envia con un bucle, de manera que mientras queden datos en el buffer aux se sigan enviando por el socket s.
-        while(aux):
-            ret = ret + cs.send(aux)
-            aux = f.read(BUFSIZE)        
-        f.close()
-        logger.error("HTTP/1.1 405 METHOD NOT ALLOWED")
-        return ret  # devuelve el número de bytes enviados 
-        
-    elif codigo==404:
-        pass
-    elif codigo==403:
-        pass
-    elif codigo==200:
-        pass
+    # se crea un mensaje en función del código de estado de la respuesta
+    if codigo==200:
+        path = p
     else:
-        logger.error("Error al construir el mensaje a enviar por el socket.")
+        path = str(codigo + ".html")
+    f = open(path, "rb")
+    tam = os.stat(path).st_size
+    header = make_header(codigo, tam)
+    if header==-1:  # fallo en la creación de la cabecera: código no válido
         return -1
-        
-    #numwrite = cs.send(cs,data.encode())
-    #return numwrite
+    logger.debug("Sending " + str(codigo) + " message:\n" + header)
+    header = header.encode()
+    msg = f.read(BUFSIZE)   # se lee con un buffer de tamaño BUFSIZE
+    # se envia la cabecera + el contenido del archivo html
+    aux = header + msg
+    enviado = 0
+    # se envia con un bucle, de manera que mientras queden datos en el buffer aux se sigan enviando por el socket s.
+    while(aux):
+        enviado = enviado + cs.send(aux)
+        aux = f.read(BUFSIZE)        
+    f.close()
+    return enviado  # devuelve el número de bytes enviados 
 
 
 def recibir_mensaje(cs):
     """ Esta función recibe datos a través del socket cs
         Leemos la información que nos llega. recv() devuelve un string con los datos.
     """
-    aux = cs.recv(BUFSIZE)
+    aux = cs.recv(BUFSIZE)  # no es necesario tratar lecturas parciales para este tipo de mensajes entrantes tan pequeños, digo yo
     # TODO cadena vacía es fin de conexión? manejar eso?
     return aux.decode()
 
@@ -91,6 +110,71 @@ def process_cookies(headers,  cs):
     """
     pass
 
+def check_request(cs, lineas, webroot):
+    ''' Analizar que la solicitud está bien formateada.
+        Devuelve una lista con los atributos de las cabeceras.
+    '''
+    host = False
+    params = {"url": "null"}
+    for i in range(len(lineas)):
+        linea = lineas[i].split()
+        if i == 0:   # tratamiento distinto de la primera línea de la solicitud
+            if len(linea)!=3:   # la linea no tiene el formato correcto
+                enviar_mensaje(cs, "", 404)
+                cerrar_conexion(cs)
+                sys.exit(0) # debug
+                # exit
+                
+            # Comprobar si la versión de HTTP es 1.1
+            if linea[2]!="HTTP/1.1":
+                enviar_mensaje(cs, "", 505)
+                cerrar_conexion(cs)
+                sys.exit(0) # debug
+                # exit
+
+            # Leer URL y eliminar parámetros si los hubiera
+            # Comprobar si el recurso solicitado es /, En ese caso el recurso es index.html
+            if linea[1]=="/":
+                params["url"] = "index.html"
+            else:
+                params["url"] = linea[1]
+            # Construir la ruta absoluta del recurso (webroot + recurso solicitado)
+            path = webroot + linea[1]
+            # Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
+            if not os.path.isfile(path):
+                enviar_mensaje(cs, "", 404)
+                logger.debug("Ruta erronea: " + path)
+                cerrar_conexion(cs)
+                sys.exit(0) # debug
+                # exit
+
+        # Analizar las cabeceras. Imprimir cada cabecera y su valor.
+        else:   # resto de líneas de la solicitud
+            if len(linea)!=2:   # la linea no tiene el formato correcto
+                enviar_mensaje(cs, "", 404)
+                cerrar_conexion(cs)
+                sys.exit(0) # debug
+                # exit
+
+            if linea[0] in params:  # hay un parámetro repetido, bad request
+                enviar_mensaje(cs, "", 400)
+                cerrar_conexion(cs)
+                sys.exit(0) # debug
+                # exit
+
+            if linea[0]=="Host":
+                host = True
+            logger.info(linea[0] + ": " + linea[1])
+            params[linea[0]] = linea[1]
+
+    if not host:    # si no se incluye la cabecera Host
+        enviar_mensaje(cs, "", 400)
+        cerrar_conexion(cs)
+        sys.exit(0) # debug
+        # exit
+
+    return params
+
 
 def process_web_request(cs, webroot):
     """ Procesamiento principal de los mensajes recibidos.
@@ -106,23 +190,12 @@ def process_web_request(cs, webroot):
             s = r[0]    # el unico posible valor de la lista es el socket. (TODO es lo mismo este socket que cs??? debería no?)
             # print(len(r)) # debug select
             msg = recibir_mensaje(s)
-            # Analizar que la línea de solicitud y comprobar está bien formateada según HTTP 1.1
             if len(msg)>0:
                 logger.debug("Client message: " + msg)
                 lineas = msg.splitlines()    # se divide el mensaje en líneas para que sea más cómodo de manejar
                 # procesar linea a linea que todo el mensaje es correcto
                 '''
-                * Devuelve una lista con los atributos de las cabeceras.
-                    * Comprobar si la versión de HTTP es 1.1
-                    
-                    * Leer URL y eliminar parámetros si los hubiera
-                    * Comprobar si el recurso solicitado es /, En ese caso el recurso es index.html
-                    * Construir la ruta absoluta del recurso (webroot + recurso solicitado)
-                    * Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
-                    * Analizar las cabeceras. Imprimir cada cabecera y su valor. Si la cabecera es Cookie comprobar
-                      el valor de cookie_counter para ver si ha llegado a MAX_ACCESOS.
-                      Si se ha llegado a MAX_ACCESOS devolver un Error "403 Forbidden"
-                    * Obtener el tamaño del recurso en bytes.
+                                        * 
                     * Extraer extensión para obtener el tipo de archivo. Necesario para la cabecera Content-Type
                     * Preparar respuesta con código 200. Construir una respuesta que incluya: la línea de respuesta y
                       las cabeceras Date, Server, Connection, Set-Cookie (para la cookie cookie_counter),
@@ -138,12 +211,22 @@ def process_web_request(cs, webroot):
                 if linea[0]!="GET":
                     # TODO gestionar PUT
                     enviar_mensaje(s, "", 405)
+                    cerrar_conexion(cs)
+                # se comprueba que la solicitud es correcta y se recogen los argumentos de la solicitud
+                print("probando probando")
+                heads = check_request(s, lineas, webroot)
+                # Si la cabecera es Cookie comprobar  el valor de cookie_counter para ver si 
+                # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
+                if "Cookie" in heads:
+                    process_cookies(heads, cs)
+                else:   # primera vez que accede al servidor
+                    cookie_counter = 1
 
 
-
-                for i in range(1,len(lineas)):
-                    # TODO chekear las lineas del mensaje http
-                    break
+                   
+                
+                
+                    
             else:
                 logger.error("ERROR")
                         
