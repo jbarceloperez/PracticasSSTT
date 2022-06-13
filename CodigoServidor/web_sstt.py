@@ -149,8 +149,8 @@ def main():
         logger.info("Iniciar escucha infinita del servidor web (addr={},port={})".format(args.host, args.port))  # debug
         while(True):
             # se acepta una conexión
-            (conn, addr) = sock.accept()
-            logger.info("Petición entrante (addr={})".format(addr))
+            conn, addr = sock.accept()
+            logger.info("Petición entrante (info={})".format(addr))
             pid = os.fork()
             # tratamiento del fork:'
             # caso del hijo: encargado de procesar la petición
