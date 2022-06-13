@@ -66,12 +66,25 @@ def process_cookies(headers,  cs):
 
 def process_web_request(cs, webroot):
     """ Procesamiento principal de los mensajes recibidos.
-
-
-            * Si no es por timeout y hay datos en el socket cs.
-                * Leer los datos con recv.
-                * Analizar que la línea de solicitud y comprobar está bien formateada según HTTP 1.1
-                    * Devuelve una lista con los atributos de las cabeceras.
+    """
+    # bucle para esperar los datos a través del socket cs con el select()
+    while(True):
+        # el select debe comprobar si el socket cs tiene datos para leer.
+        # además se comprueba si hay que cerrar la conexión por un timeout
+        r, wsublist, xsublist = select.select([cs],[],[], TIMEOUT_CONNECTION)
+        # si hay algo en el conjunto de lectura r, se procesa. Si no, es que ha saltado el timeout.
+        if r:
+            # Leer los datos con recv.
+            s = r[0]    # el unico posible valor de la lista es el socket. (TODO es lo mismo este socket que cs??? debería no?)
+            # print(len(r)) # debug select
+            msg = recibir_mensaje(s)
+            # Analizar que la línea de solicitud y comprobar está bien formateada según HTTP 1.1
+            if len(msg)>0:
+                logger.debug("Client message: " + msg)
+                lineas = msg.splitlines()    # se divide el mensaje en líneas para que sea más cómodo de manejar
+                # procesar linea a linea que todo el mensaje es correcto
+                '''
+                * Devuelve una lista con los atributos de las cabeceras.
                     * Comprobar si la versión de HTTP es 1.1
                     * Comprobar si es un método GET. Si no devolver un error Error 405 "Method Not Allowed".
                     * Leer URL y eliminar parámetros si los hubiera
@@ -90,30 +103,14 @@ def process_web_request(cs, webroot):
                     * Se abre el fichero en modo lectura y modo binario
                         * Se lee el fichero en bloques de BUFSIZE bytes (8KB)
                         * Cuando ya no hay más información para leer, se corta el bucle
-
-            * Si es por timeout, se cierra el socket tras el período de persistencia.
-                * NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
-    """
-    # bucle para esperar los datos a través del socket cs con el select()
-    while(True):
-        # el select debe comprobar si el socket cs tiene datos para leer.
-        # además se comprueba si hay que cerrar la conexión por un timeout
-        r, wsublist, xsublist = select.select([cs],[],[], TIMEOUT_CONNECTION)
-        # si hay algo en el conjunto de lectura r, se procesa. Si no, es que ha saltado el timeout.
-        if r:
-            # Leer los datos con recv.
-            s = r[0]    # el unico posible valor de la lista es el socket. (TODO es lo mismo este socket que cs??? debería no?)
-            # print(len(r)) # debug select
-            msg = recibir_mensaje(s)
-            if len(msg)>0:
-                logger.debug("Client message: " + msg)
-                lineas = msg.splitlines()    # se divide el mensaje en líneas para que sea más cómodo de manejar
+                '''
                 for l in lineas:
-                    print(l)
-                    print("---")
-
-
-            
+                    #print(l)    # debug
+                    # TODO chekear las lineas del mensaje http
+                    pass
+            else:
+                logger.error("ERROR")
+                        
             sys.exit(0)
 
         # Si es por timeout, se cierra el socket tras el período de persistencia.
