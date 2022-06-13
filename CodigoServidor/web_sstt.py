@@ -199,7 +199,7 @@ def process_web_request(cs, webroot):
                 if linea[0]!="GET":
                     # TODO gestionar PUT
                     enviar_mensaje(s, "", 405)
-                    cerrar_conexion(cs)
+                    # cerrar_conexion(cs) NO SE DEBE CERRAR EL SOCKET POR PERSISTENCIA, YA SE ENCARGARÁ EL TIMEOUT DE CERRARLO
                 # se comprueba que la solicitud es correcta y se recogen los argumentos de la solicitud
                 else:
                     heads = check_request(s, lineas, webroot)
@@ -210,16 +210,14 @@ def process_web_request(cs, webroot):
                             process_cookies(heads, cs)
                         else:   # primera vez que accede al servidor
                             cookie_counter = 1
-
-
-                   
-                
-                
                     
             else:
-                logger.error("ERROR")
-                        
-            # sys.exit(0)
+                logger.error("Timeout socket {}".format(cs))
+                t='TIMEOUT'
+                t=t.encode()
+                s.send(t)
+                cerrar_conexion(cs)
+                # sys.exit(0)
 
         # Si es por timeout, se cierra el socket tras el período de persistencia.
         # NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
