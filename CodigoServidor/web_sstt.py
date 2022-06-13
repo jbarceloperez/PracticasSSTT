@@ -30,12 +30,40 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger()
 
 
-def enviar_mensaje(cs, data):
+def enviar_mensaje(cs, data, codigo):
     """ Esta función envía datos (data) a través del socket cs.
         Devuelve el número de bytes enviados.
     """
-    numwrite = cs.send(cs,data.encode())
-    return numwrite
+    if codigo==405:
+        f = open("405.html", "rb")
+        tam = os.stat("405.html").st_size
+        header = "HTTP/1.1 405 Method Not Allowed\r\nDate: " + datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT\r\n') + "Server: web.rugbycartagena78.org\r\nConnection: Keep-Alive\r\nKeep-Alive: timeout=24\r\nContent-Length: " + str(tam) + "\r\nContent-Type: text/html\r\n\r\n"
+        logger.debug("Sending 405 message:\n" + header)
+        header = header.encode()
+        msg = f.read(BUFSIZE)   # se lee con un buffer de tamaño BUFSIZE
+        # se envia la cabecera + el contenido del archivo html
+        aux = header + msg
+        ret
+        # se envia con un bucle, de manera que mientras queden datos en el buffer aux se sigan enviando por el socket s.
+        while(aux):
+            ret = ret + cs.send(aux)
+            aux = f.read(BUFSIZE)        
+        f.close()
+        logger.error("HTTP/1.1 405 METHOD NOT ALLOWED")
+        return ret  # devuelve el número de bytes enviados 
+        
+    elif codigo==404:
+        pass
+    elif codigo==403:
+        pass
+    elif codigo==200:
+        pass
+    else:
+        logger.error("Error al construir el mensaje a enviar por el socket.")
+        return -1
+        
+    #numwrite = cs.send(cs,data.encode())
+    #return numwrite
 
 
 def recibir_mensaje(cs):
@@ -86,7 +114,7 @@ def process_web_request(cs, webroot):
                 '''
                 * Devuelve una lista con los atributos de las cabeceras.
                     * Comprobar si la versión de HTTP es 1.1
-                    * Comprobar si es un método GET. Si no devolver un error Error 405 "Method Not Allowed".
+                    
                     * Leer URL y eliminar parámetros si los hubiera
                     * Comprobar si el recurso solicitado es /, En ese caso el recurso es index.html
                     * Construir la ruta absoluta del recurso (webroot + recurso solicitado)
@@ -104,10 +132,18 @@ def process_web_request(cs, webroot):
                         * Se lee el fichero en bloques de BUFSIZE bytes (8KB)
                         * Cuando ya no hay más información para leer, se corta el bucle
                 '''
-                for l in lineas:
-                    #print(l)    # debug
+
+                linea = lineas[0].split()
+                # Comprobar si es un método GET. Si no devolver un error Error 405 "Method Not Allowed".
+                if linea[0]!="GET":
+                    # TODO gestionar PUT
+                    enviar_mensaje(s, "", 405)
+
+
+
+                for i in range(1,len(lineas)):
                     # TODO chekear las lineas del mensaje http
-                    pass
+                    break
             else:
                 logger.error("ERROR")
                         
