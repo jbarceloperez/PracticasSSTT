@@ -43,6 +43,7 @@ def enviar_mensaje(cs, data, codigo):
         msg = f.read(BUFSIZE)   # se lee con un buffer de tamaño BUFSIZE
         # se envia la cabecera + el contenido del archivo html
         aux = header + msg
+        ret=0
         # se envia con un bucle, de manera que mientras queden datos en el buffer aux se sigan enviando por el socket s.
         while(aux):
             ret = ret + cs.send(aux)
