@@ -67,7 +67,7 @@ def process_cookies(headers,  cs):
 def process_web_request(cs, webroot):
     """ Procesamiento principal de los mensajes recibidos.
 
-    
+
             * Si no es por timeout y hay datos en el socket cs.
                 * Leer los datos con recv.
                 * Analizar que la línea de solicitud y comprobar está bien formateada según HTTP 1.1
@@ -159,6 +159,7 @@ def main():
                 sock.close()
                 process_web_request(conn, args.webroot)
                 # TODO salir del while(True)???????
+                sys.exit(1)
             # caso del padre: cerrar la conexión que gestiona el hijo
             else:
                 cerrar_conexion(conn)
