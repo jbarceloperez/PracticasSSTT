@@ -57,7 +57,7 @@ def make_header(codigo, tam):
         logger.error("Error al construir el mensaje a enviar por el socket: código no válido.")
         return -1
 
-def enviar_mensaje(cs, p, cookie, codigo):
+def enviar_mensaje(cs, p, codigo):
     """ Esta función envía datos (data) a través del socket cs.
         Devuelve el número de bytes enviados.
     """
