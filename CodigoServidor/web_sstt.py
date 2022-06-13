@@ -107,6 +107,7 @@ def process_web_request(cs, webroot):
                 print("ole")
             else:
                 print("not ole :(")
+                sys.exit(1)
             
 
             pass
