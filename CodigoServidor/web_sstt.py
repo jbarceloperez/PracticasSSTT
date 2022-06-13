@@ -143,7 +143,7 @@ def main():
         # con esta opcion del socket permitimos que reuse la misma dirección
         sock.setsockopt(SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # vincular socket a ip y puerto pasados como parámetros
-        sock.bind(args.host, args.port)
+        sock.bind((args.host, args.port))   # !!! bind() takes exactly one argument (2 given)
         # escuchar conexiones entrantes
         sock.listen()
         print("iniciar escucha infinita del servidor web")  # debug
