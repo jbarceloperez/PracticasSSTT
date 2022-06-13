@@ -4,6 +4,7 @@
 import socket
 import selectors    #https://docs.python.org/3/library/selectors.html
 import select
+from ssl import SOL_SOCKET
 import types        # Para definir el tipo de datos data
 import argparse     # Leer parametros de ejecución
 import os           # Obtener ruta y extension
@@ -34,6 +35,7 @@ def enviar_mensaje(cs, data):
     """ Esta función envía datos (data) a través del socket cs
         Devuelve el número de bytes enviados.
     """
+    
     pass
 
 
@@ -136,6 +138,31 @@ def main():
 
             - Si es el proceso padre cerrar el socket que gestiona el hijo.
         """
+        # crear un socket TCP
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
+        # con esta opcion del socket permitimos que reuse la misma dirección
+        sock.setsockopt(SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # vincular socket a ip y puerto pasados como parámetros
+        sock.bind(args.host, args.port)
+        # escuchar conexiones entrantes
+        sock.listen()
+        print("iniciar escucha infinita del servidor web")  # debug
+        while(True):
+            # se acepta una conexión
+            conn, addr = sock.accept()
+            pid = os.fork()
+            # tratamiento del fork:'
+            # caso del hijo: encargado de procesar la petición
+            if pid == 0:
+                sock.close()
+                process_web_request(conn, args.webroot)
+                # salir del while(True)???????
+            # caso del padre: cerrar la conexión
+            else:
+                cerrar_conexion(conn)
+
+
+
     except KeyboardInterrupt:
         True
 
