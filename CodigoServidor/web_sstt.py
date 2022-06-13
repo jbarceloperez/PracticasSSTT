@@ -136,6 +136,7 @@ def main():
 
         if args.verbose:
             logger.setLevel(logging.DEBUG)
+            logger.debug("Debug logging level is set.")
 
         logger.info('Enabling server in address {} and port {}.'.format(args.host, args.port))
         logger.info("Serving files from {}".format(args.webroot))
