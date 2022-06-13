@@ -31,24 +31,26 @@ logger = logging.getLogger()
 
 
 def enviar_mensaje(cs, data):
-    """ Esta función envía datos (data) a través del socket cs
+    """ Esta función envía datos (data) a través del socket cs.
         Devuelve el número de bytes enviados.
     """
-    
-    pass
+    numwrite = cs.send(cs,data.encode())
+    return numwrite
 
 
 def recibir_mensaje(cs,data):
     """ Esta función recibe datos a través del socket cs
         Leemos la información que nos llega. recv() devuelve un string con los datos.
     """
-    pass
+    aux = cs.recv(BUFSIZE)
+    # TODO cadena vacía es fin de conexión? manejar eso?
+    return aux.decode()
 
 
 def cerrar_conexion(cs):
     """ Esta función cierra una conexión activa.
     """
-    pass
+    cs.close()
 
 
 def process_cookies(headers,  cs):
@@ -64,13 +66,8 @@ def process_cookies(headers,  cs):
 
 def process_web_request(cs, webroot):
     """ Procesamiento principal de los mensajes recibidos.
-        Típicamente se seguirá un procedimiento similar al siguiente (aunque el alumno puede modificarlo si lo desea)
 
-        * Bucle para esperar hasta que lleguen datos en la red a través del socket cs con select()
-
-            * Se comprueba si hay que cerrar la conexión por exceder TIMEOUT_CONNECTION segundos
-              sin recibir ningún mensaje o hay datos. Se utiliza select.select
-
+    
             * Si no es por timeout y hay datos en el socket cs.
                 * Leer los datos con recv.
                 * Analizar que la línea de solicitud y comprobar está bien formateada según HTTP 1.1
@@ -97,6 +94,28 @@ def process_web_request(cs, webroot):
             * Si es por timeout, se cierra el socket tras el período de persistencia.
                 * NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
     """
+    # bucle para esperar los datos a través del socket cs con el select()
+    while(True):
+        # el select debe comprobar si el socket cs tiene datos para leer.
+        # además se comprueba si hay que cerrar la conexión por un timeout
+        r, wsublist, xsublist = select.select([cs],[],[], TIMEOUT_CONNECTION)
+        # si hay algo en el conjunto de lectura r, se procesa. Si no, es que ha saltado el timeout.
+        if r:
+            # Leer los datos con recv.
+            s = r[0]    # el unico posible valor de la lista es el socket
+            if (s==r):
+                print("ole")
+            else:
+                print("not ole :(")
+            
+
+            pass
+        # Si es por timeout, se cierra el socket tras el período de persistencia.
+        # NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
+
+        else:
+            logger.error("Timeout alcanzado.")
+            cerrar_conexion(cs)
 
 
 def main():
@@ -113,31 +132,14 @@ def main():
         parser.add_argument('--verbose', '-v', action='store_true', help='Incluir mensajes de depuración en la salida')
         args = parser.parse_args()
 
-
         if args.verbose:
             logger.setLevel(logging.DEBUG)
 
         logger.info('Enabling server in address {} and port {}.'.format(args.host, args.port))
-
         logger.info("Serving files from {}".format(args.webroot))
 
-        """ Funcionalidad a realizar
-        * Crea un socket TCP (SOCK_STREAM)
-        * Permite reusar la misma dirección previamente vinculada a otro proceso. Debe ir antes de sock.bind
-        * Vinculamos el socket a una IP y puerto elegidos
 
-        * Escucha conexiones entrantes
-
-        * Bucle infinito para mantener el servidor activo indefinidamente
-            - Aceptamos la conexión
-
-            - Creamos un proceso hijo
-
-            - Si es el proceso hijo se cierra el socket del padre y procesar la petición con process_web_request()
-
-            - Si es el proceso padre cerrar el socket que gestiona el hijo.
-        """
-        # crear un socket TCP
+        # crear un socket TCP (SOCK_STREAM)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, 0)
         # con esta opcion del socket permitimos que reuse la misma dirección
         sock.setsockopt(SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -152,12 +154,12 @@ def main():
             logger.info("Petición entrante (info={})".format(addr))
             pid = os.fork()
             # tratamiento del fork:'
-            # caso del hijo: encargado de procesar la petición
+            # caso del hijo: encargado de cerrar el socket del padre y procesar la petición
             if pid == 0:
                 sock.close()
                 process_web_request(conn, args.webroot)
-                # salir del while(True)???????
-            # caso del padre: cerrar la conexión
+                # TODO salir del while(True)???????
+            # caso del padre: cerrar la conexión que gestiona el hijo
             else:
                 cerrar_conexion(conn)
 

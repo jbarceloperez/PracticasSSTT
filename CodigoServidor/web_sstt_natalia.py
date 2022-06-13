@@ -100,7 +100,7 @@ def process_web_request(cs, webroot):
                             logger.error("HTTP/1.1 405 Method Allowed")
                             break
                         #     * Analizar que la línea de solicitud y comprobar está bien formateada según HTTP 1.1
-                    #expresion regular de prueba
+                        #expresion regular de prueba
                         pattern='GET\s(.+)\sHTTP/1.1*([\][a-z])*(\s*.*)\sHost:([a-z]*[0-9]*[.:]?[a-z]*[0-9]*)([\][a-z])*(\s*.*)*'
                         if re.fullmatch(pattern,data):
                             print("coincide")
@@ -153,13 +153,13 @@ def process_web_request(cs, webroot):
                             """
                         #       * Comprobar si la versión de HTTP es 1.1
                         #headers=data.split()
-#ELIMINAR LOS PARAMETROS DE LA URL
+                        #ELIMINAR LOS PARAMETROS DE LA URL
                         #     * Leer URL y eliminar parámetros si los hubiera
                         #    * Comprobar si el recurso solicitado es /, En ese caso el recurso es index.html
                         #if(headers[1]=="/"):
                          #   f=open("index.html","r")
-                 #   * Construir la ruta absoluta del recurso (webroot + recurso solicitado)
-                  #  * Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
+                        #   * Construir la ruta absoluta del recurso (webroot + recurso solicitado)
+                        #  * Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
                        # for i in headers:
                         #    print(i)
                         if 'Cookie:' in headers:
