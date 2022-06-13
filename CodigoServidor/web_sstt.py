@@ -121,16 +121,12 @@ def check_request(cs, lineas, webroot):
         if i == 0:   # tratamiento distinto de la primera línea de la solicitud
             if len(linea)!=3:   # la linea no tiene el formato correcto
                 enviar_mensaje(cs, "", 404)
-                cerrar_conexion(cs)
-                sys.exit(0) # debug
-                # exit
+                return -1
                 
             # Comprobar si la versión de HTTP es 1.1
             if linea[2]!="HTTP/1.1":
                 enviar_mensaje(cs, "", 505)
-                cerrar_conexion(cs)
-                sys.exit(0) # debug
-                # exit
+                return -1
 
             # Leer URL y eliminar parámetros si los hubiera
             # Comprobar si el recurso solicitado es /, En ese caso el recurso es index.html
@@ -144,23 +140,17 @@ def check_request(cs, lineas, webroot):
             if not os.path.isfile(path):
                 enviar_mensaje(cs, "", 404)
                 logger.debug("Ruta erronea: " + path)
-                cerrar_conexion(cs)
-                sys.exit(0) # debug
-                # exit
+                return -1
 
         # Analizar las cabeceras. Imprimir cada cabecera y su valor.
         else:   # resto de líneas de la solicitud
             if len(linea)!=2:   # la linea no tiene el formato correcto
                 enviar_mensaje(cs, "", 404)
-                cerrar_conexion(cs)
-                sys.exit(0) # debug
-                # exit
+                return -1
 
             if linea[0] in params:  # hay un parámetro repetido, bad request
                 enviar_mensaje(cs, "", 400)
-                cerrar_conexion(cs)
-                sys.exit(0) # debug
-                # exit
+                return -1
 
             if linea[0]=="Host":
                 host = True
@@ -169,9 +159,7 @@ def check_request(cs, lineas, webroot):
 
     if not host:    # si no se incluye la cabecera Host
         enviar_mensaje(cs, "", 400)
-        cerrar_conexion(cs)
-        sys.exit(0) # debug
-        # exit
+        return -1
 
     return params
 
@@ -213,14 +201,15 @@ def process_web_request(cs, webroot):
                     enviar_mensaje(s, "", 405)
                     cerrar_conexion(cs)
                 # se comprueba que la solicitud es correcta y se recogen los argumentos de la solicitud
-                print("probando probando")
-                heads = check_request(s, lineas, webroot)
-                # Si la cabecera es Cookie comprobar  el valor de cookie_counter para ver si 
-                # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
-                if "Cookie" in heads:
-                    process_cookies(heads, cs)
-                else:   # primera vez que accede al servidor
-                    cookie_counter = 1
+                else:
+                    heads = check_request(s, lineas, webroot)
+                    # Si la cabecera es Cookie comprobar  el valor de cookie_counter para ver si 
+                    # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
+                    if heads!=-1:
+                        if "Cookie" in heads:
+                            process_cookies(heads, cs)
+                        else:   # primera vez que accede al servidor
+                            cookie_counter = 1
 
 
                    
