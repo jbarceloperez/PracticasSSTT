@@ -146,7 +146,7 @@ def main():
         sock.bind((args.host, args.port))   # !!! bind() takes exactly one argument (2 given)
         # escuchar conexiones entrantes
         sock.listen()
-        logger.info("Iniciar escucha infinita del servidor web (addr="+args.host+",port="+args.port+")")  # debug
+        logger.info("Iniciar escucha infinita del servidor web (addr={},port={})".format(args.host, args.port))  # debug
         while(True):
             # se acepta una conexión
             (conn, addr) = sock.accept()
