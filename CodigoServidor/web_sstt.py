@@ -110,6 +110,7 @@ def process_web_request(cs, webroot):
                 lineas = msg.splitlines()    # se divide el mensaje en líneas para que sea más cómodo de manejar
                 for l in lineas:
                     print(l)
+                    print("---")
 
 
             
