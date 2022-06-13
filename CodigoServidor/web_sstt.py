@@ -103,6 +103,7 @@ def process_web_request(cs, webroot):
         if r:
             # Leer los datos con recv.
             s = r[0]    # el unico posible valor de la lista es el socket
+            print(len(r))
             if (s==r):
                 print("ole")
             else:
