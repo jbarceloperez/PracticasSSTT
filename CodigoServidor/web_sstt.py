@@ -102,15 +102,15 @@ def process_web_request(cs, webroot):
         # si hay algo en el conjunto de lectura r, se procesa. Si no, es que ha saltado el timeout.
         if r:
             # Leer los datos con recv.
-            s = r[0]    # el unico posible valor de la lista es el socket
-            print(len(r)) # debug select
-            if (s==r):
-                print("ole")
-            else:
-                print("not ole :(")
-                sys.exit(1)
-            
+            s = r[0]    # el unico posible valor de la lista es el socket. (TODO es lo mismo este socket que cs??? debería no?)
+            # print(len(r)) # debug select
+            msg = recibir_mensaje(s)
+            if len(msg)>0:
+                logger.debug("Client message: " + msg)
 
+
+            
+            sys.exit(0)
             pass
         # Si es por timeout, se cierra el socket tras el período de persistencia.
         # NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
