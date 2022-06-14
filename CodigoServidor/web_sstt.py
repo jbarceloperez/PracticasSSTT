@@ -18,7 +18,7 @@ import logging      # Para imprimir logs
 
 
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
-TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
+TIMEOUT_CONNECTION = 40 # Timout para la conexión persistente
 MAX_ACCESOS = 10
 COOKIE_MAX_AGE = 20     # segundos que durará la cookie desde su creación
 
