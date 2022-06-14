@@ -131,7 +131,7 @@ def check_request(cs, lineas, webroot):
         linea = lineas[i].split()
         if i == 0:   # tratamiento distinto de la primera línea de la solicitud
             if len(linea)!=3:   # la linea no tiene el formato correcto
-                enviar_mensaje(cs, "", "", 404)
+                enviar_mensaje(cs, "", "", 400)
                 return -1
                 
             # Comprobar si la versión de HTTP es 1.1
