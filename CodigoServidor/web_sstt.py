@@ -108,7 +108,7 @@ def cerrar_conexion(cs):
 
 
 def process_cookies(cookie,  cs):
-    """ Esta función procesa la cookie cookie_counter
+    """ Esta función procesa la cookie cookie_counter. Se debe pasar el parámetro cookie como INTEGER
         1. Si tiene el valor MAX_ACCESSOS se manda un mensaje 403 forbidden y devuelve -1 
         2. Si se encuentra y tiene un valor 1 <= x < MAX_ACCESOS se incrementa en 1 y se devuelve el valor
     """
@@ -222,7 +222,7 @@ def process_web_request(cs, webroot):
                     # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
                     if heads!=-1:
                         if "Cookie:" in heads:
-                            cookie_counter = process_cookies(heads["Cookie:"], s)
+                            cookie_counter = process_cookies(int(heads["Cookie:"]), s)
                             if cookie_counter!=-1:  # si no se ha mandado un mensaje forbidden
                                 enviar_mensaje(s, heads["url"], cookie_counter, 200)
                         else:   # primera vez que accede al servidor
