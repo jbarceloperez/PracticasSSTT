@@ -9,11 +9,9 @@ def main():
 
     pattern = '\r\n'
     lineas = string.splitlines()
-    for l in lineas:
-        if l == lineas[len(lineas)-1]:
-            pass
-        else:
-            print(l)
+    linea = lineas[0].split()
+    if linea[2]!="HTTP/1.1":
+        print("505")
     '''
     s1 = 'HOLA QUE TAL TENGO '
     s2 = " MONEDAS DE PLATA"

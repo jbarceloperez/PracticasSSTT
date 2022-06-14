@@ -19,8 +19,8 @@ import logging      # Para imprimir logs
 
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
 TIMEOUT_CONNECTION = 40 # Timout para la conexión persistente
-MAX_ACCESOS = 20
-COOKIE_MAX_AGE = 10     # segundos que durará la cookie desde su creación
+MAX_ACCESOS = 10
+COOKIE_MAX_AGE = 120     # segundos que durará la cookie desde su creación
 
 # Extensiones admitidas (extension, name in HTTP)
 filetypes = {"gif":"image/gif", "jpg":"image/jpg", "jpeg":"image/jpeg", "png":"image/png", "htm":"text/htm", 
@@ -199,7 +199,7 @@ def process_web_request(cs, webroot):
             s = r[0]    # el unico posible valor de la lista es el socket. (TODO es lo mismo este socket que cs??? debería no?)
             # print(len(r)) # debug select
             msg = recibir_mensaje(s)
-            if len(msg)>0:
+            if len(msg)>1:
                 logger.debug("Client message: " + msg)
                 lineas = msg.splitlines()    # se divide el mensaje en líneas para que sea más cómodo de manejar
                 print("")
@@ -228,11 +228,10 @@ def process_web_request(cs, webroot):
                         else:   # primera vez que accede al servidor
                             enviar_mensaje(s, heads["url"], 1, 200)
                     
-            else:
-                logger.error("Timeout alcanzado.")
-                logger.error("1 timeout en socket={}".format(cs))
+            else:   # se ha mandado un espacio, que se interpreta como finalizar la conexión
+                logger.error("Conexion finalizada por el usuario.")
                 cerrar_conexion(cs)
-                timeout = 1
+                timeout = 1 # no es un timeout pero cierra la conexion igual
                 # sys.exit(0)
 
         # Si es por timeout, se cierra el socket tras el período de persistencia.
