@@ -128,50 +128,50 @@ def check_request(cs, lineas, webroot):
     params = {"url": "null"}
     logger.debug("Lineas de la petición: " + str(len(lineas)))
     for i in range(len(lineas)):
-        print("linea" + lineas[i])
-        linea = lineas[i].split()
-        if i == 0:   # tratamiento distinto de la primera línea de la solicitud
-            if len(linea)!=3:   # la linea no tiene el formato correcto
-                enviar_mensaje(cs, "", "", 400)
-                return -1
-                
-            # Comprobar si la versión de HTTP es 1.1
-            if linea[2]!="HTTP/1.1":
-                enviar_mensaje(cs, "", "", 505)
-                return -1
+        if i!=len(lineas)-1:   # la última línea es un \r\n, se omite
+            linea = lineas[i].split()
+            if i == 0:   # tratamiento distinto de la primera línea de la solicitud
+                if len(linea)!=3:   # la linea no tiene el formato correcto
+                    enviar_mensaje(cs, "", "", 400)
+                    return -1
+                    
+                # Comprobar si la versión de HTTP es 1.1
+                if linea[2]!="HTTP/1.1":
+                    enviar_mensaje(cs, "", "", 505)
+                    return -1
 
-            # Leer URL y eliminar parámetros si los hubiera
-            # Comprobar si el recurso solicitado es /, En ese caso el recurso es index.html
-            if linea[1]=="/":
-                params["url"] = "index.html"
-            else:
-                params["url"] = linea[1]
-            # Construir la ruta absoluta del recurso (webroot + recurso solicitado)
-            path = webroot + params["url"]
-            # Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
-            if not os.path.isfile(path):
-                enviar_mensaje(cs, "", "", 404)
-                logger.debug("Ruta erronea: " + path)
-                return -1
+                # Leer URL y eliminar parámetros si los hubiera
+                # Comprobar si el recurso solicitado es /, En ese caso el recurso es index.html
+                if linea[1]=="/":
+                    params["url"] = "index.html"
+                else:
+                    params["url"] = linea[1]
+                # Construir la ruta absoluta del recurso (webroot + recurso solicitado)
+                path = webroot + params["url"]
+                # Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
+                if not os.path.isfile(path):
+                    enviar_mensaje(cs, "", "", 404)
+                    logger.debug("Ruta erronea: " + path)
+                    return -1
 
-        # Analizar las cabeceras. Imprimir cada cabecera y su valor.
-        else:   # resto de líneas de la solicitud
-            if len(linea)<2:   # la linea no tiene el formato correcto
-                enviar_mensaje(cs, "", "", 400)
-                return -1
+            # Analizar las cabeceras. Imprimir cada cabecera y su valor.
+            else:   # resto de líneas de la solicitud
+                if len(linea)<2:   # la linea no tiene el formato correcto
+                    enviar_mensaje(cs, "", "", 400)
+                    return -1
 
-            if linea[0] in params:  # hay un parámetro repetido, bad request
-                enviar_mensaje(cs, "", "", 400)
-                return -1
+                if linea[0] in params:  # hay un parámetro repetido, bad request
+                    enviar_mensaje(cs, "", "", 400)
+                    return -1
 
-            if linea[0]=="Host:":
-                host = True
+                if linea[0]=="Host:":
+                    host = True
 
-            aux = " "
-            for i in range(1, len(linea)):
-                aux = aux + linea[i] + " "
-            logger.info(linea[0] + " " + aux)
-            params[linea[0]] = aux
+                aux = " "
+                for i in range(1, len(linea)):
+                    aux = aux + linea[i] + " "
+                logger.info(linea[0] + " " + aux)
+                params[linea[0]] = aux
 
     if not host:    # si no se incluye la cabecera Host
         enviar_mensaje(cs, "", "", 400)
