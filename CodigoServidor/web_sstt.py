@@ -112,7 +112,7 @@ def process_cookies(cookie,  cs):
         1. Si tiene el valor MAX_ACCESSOS se manda un mensaje 403 forbidden y devuelve -1 
         2. Si se encuentra y tiene un valor 1 <= x < MAX_ACCESOS se incrementa en 1 y se devuelve el valor
     """
-    if cookie>=1 and cookie<MAX_ACCESOS:
+    if cookie>0 and cookie<=MAX_ACCESOS:
         logger.debug("cookie_counter="+str(cookie))
         return cookie+1
     else:   # se manda un mensaje forbidden si se alcanza MAX_ACCESOS
@@ -283,15 +283,13 @@ def main():
             # tratamiento del fork:'
             # caso del hijo: encargado de cerrar el socket del padre y procesar la petición
             if pid == 0:
-                sock.close()
+                cerrar_conexion(sock)
                 process_web_request(conn, args.webroot)
-                # TODO salir del while(True)???????
-                sys.exit(1)
+                # si sale del método process_web_request es porque el socket se ha cerrado, por lo que se finaliza la ejecución
+                sys.exit(0)
             # caso del padre: cerrar la conexión que gestiona el hijo
             else:
                 cerrar_conexion(conn)
-
-
 
     except KeyboardInterrupt:
         True
