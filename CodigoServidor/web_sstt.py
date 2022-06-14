@@ -145,7 +145,7 @@ def check_request(cs, lineas, webroot):
                 if linea[1]=="/":
                     params["url"] = "index.html"
                 else:
-                    if re.fullmatch("/.+", linea[1]):
+                    if re.fullmatch("/.+", linea[1]):   # elimina la / de las urls cuando sea necesario
                         params["url"] = linea[1].replace("/","")
                     else:
                         params["url"] = linea[1]
