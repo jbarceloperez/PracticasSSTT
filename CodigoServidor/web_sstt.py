@@ -145,7 +145,10 @@ def check_request(cs, lineas, webroot):
                 if linea[1]=="/":
                     params["url"] = "index.html"
                 else:
-                    params["url"] = linea[1]
+                    if re.fullmatch("/.+"):
+                        params["url"] = linea[1].replace("/","")
+                    else:
+                        params["url"] = linea[1]
                 # Construir la ruta absoluta del recurso (webroot + recurso solicitado)
                 path = webroot + params["url"]
                 # Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
