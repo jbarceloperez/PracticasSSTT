@@ -20,7 +20,7 @@ import logging      # Para imprimir logs
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
 TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
 KEEPALIVE_TIMEOUT = 25  # Timeout HTTP
-MAX_ACCESOS = 10
+MAX_ACCESOS = 20
 
 # Extensiones admitidas (extension, name in HTTP)
 filetypes = {"gif":"image/gif", "jpg":"image/jpg", "jpeg":"image/jpeg", "png":"image/png", "htm":"text/htm", 
@@ -229,7 +229,7 @@ def process_web_request(cs, webroot):
                     
             else:
                 logger.error("Timeout alcanzado.")
-                logger.debug("1 timeout en socket={}".format(cs))
+                logger.error("1 timeout en socket={}".format(cs))
                 cerrar_conexion(cs)
                 timeout = 1
                 # sys.exit(0)
@@ -238,7 +238,7 @@ def process_web_request(cs, webroot):
         # NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
         else:
             logger.error("Timeout alcanzado.")
-            logger.debug("2 timeout en socket={}".format(cs))
+            logger.error("2 timeout en socket={}".format(cs))
             cerrar_conexion(cs)
             timeout = 1
 
@@ -273,7 +273,6 @@ def main():
         sock.bind((args.host, args.port))   # !!! bind() takes exactly one argument (2 given)
         # escuchar conexiones entrantes
         sock.listen()
-        print(sock.__getattribute__("raddr"))
         logger.info("Iniciar escucha infinita del servidor web (addr={},port={})".format(args.host, args.port))  # debug
         while(True):
             # se acepta una conexión
