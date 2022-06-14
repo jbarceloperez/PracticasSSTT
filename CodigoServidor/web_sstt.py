@@ -18,7 +18,7 @@ import logging      # Para imprimir logs
 
 
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
-TIMEOUT_CONNECTION = 40 # Timout para la conexión persistente
+TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
 MAX_ACCESOS = 10
 COOKIE_MAX_AGE = 120     # segundos que durará la cookie desde su creación
 
@@ -206,7 +206,7 @@ def process_web_request(cs, webroot):
                 logger.info("New Client message: " + lineas[0])
                 # procesar linea a linea que todo el mensaje es correcto
                 '''
-                    * Extraer extensión para obtener el tipo de archivo. Necesario para la cabecera Content-Type
+                    Extraer extensión para obtener el tipo de archivo. Necesario para la cabecera Content-Type
                 '''                
 
                 linea = lineas[0].split()
