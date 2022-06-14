@@ -138,16 +138,20 @@ def check_request(cs, lineas, webroot):
                 if linea[2]!="HTTP/1.1":
                     enviar_mensaje(cs, "", "", 505)
                     return -1
+                # Extraer extensión para obtener el tipo de archivo. Necesario para la cabecera Content-Type
+                # TODO
 
                 # Leer URL y eliminar parámetros si los hubiera
                 # Comprobar si el recurso solicitado es /, En ese caso el recurso es index.html
                 if linea[1]=="/":
                     params["url"] = "index.html"
                 else:
-                    if re.fullmatch("/.+", linea[1]):   # elimina la / de las urls cuando sea necesario
-                        params["url"] = linea[1].replace("/","")
+                    if re.fullmatch("^?[a-zA-Z0-9\/][a-zA-Z0-9_-]\.[a-z]+$", linea[1]):   # elimina las solicitudes de urls no validas
+                        st = linea[1].replace("/","")
                     else:
-                        params["url"] = linea[1]
+                        enviar_mensaje(cs, "", "", 400)
+                        return -1
+                    
                 # Construir la ruta absoluta del recurso (webroot + recurso solicitado)
                 path = webroot + params["url"]
                 # Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
@@ -203,10 +207,6 @@ def process_web_request(cs, webroot):
                 print("")
                 logger.info("New Client message: " + lineas[0])
                 # procesar linea a linea que todo el mensaje es correcto
-                '''
-                    Extraer extensión para obtener el tipo de archivo. Necesario para la cabecera Content-Type
-                '''                
-
                 linea = lineas[0].split()
                 # Comprobar si es un método GET. Si no devolver un error Error 405 "Method Not Allowed".
                 if linea[0]!="GET":
