@@ -215,18 +215,23 @@ def process_web_request(cs, webroot):
                     params = check_request(s, lineas, webroot)
                     e = re.search("[a-z]+$", params["url"])
                     extension = e.group()
-                    params["filetype_req"] = filetypes[extension]
-                    # Si la cabecera es Cookie comprobar  el valor de cookie_counter para ver si 
-                    # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
-                    if params!=-1:
-                        if "Cookie:" in params:
-                            cookie_counter = process_cookies(int(params["Cookie:"]), s)
-                            if cookie_counter!=-1:  # si no se ha mandado un mensaje forbidden
-                                params["Cookie:"] = str(cookie_counter)
+                    if not extension in filetypes:
+                        logger.error("Extensión [" + extension + "] no admitida.")
+                        enviar_mensaje(s, "", 400)
+                        pass
+                    else:
+                        params["filetype_req"] = filetypes[extension]
+                        # Si la cabecera es Cookie comprobar  el valor de cookie_counter para ver si 
+                        # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
+                        if params!=-1:
+                            if "Cookie:" in params:
+                                cookie_counter = process_cookies(int(params["Cookie:"]), s)
+                                if cookie_counter!=-1:  # si no se ha mandado un mensaje forbidden
+                                    params["Cookie:"] = str(cookie_counter)
+                                    enviar_mensaje(s, params, 200)
+                            else:   # primera vez que accede al servidor
+                                params["Cookie:"] = 1
                                 enviar_mensaje(s, params, 200)
-                        else:   # primera vez que accede al servidor
-                            params["Cookie:"] = 1
-                            enviar_mensaje(s, params, 200)
                     
             else:   # timeout
                 logger.info("Timeout alcanzado.")
