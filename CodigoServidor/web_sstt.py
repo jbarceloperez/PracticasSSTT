@@ -228,7 +228,7 @@ def process_web_request(cs, webroot):
                             enviar_mensaje(s, heads["url"], 1, 200)
                     
             else:
-                logger.error("Timeout alcanzado.")
+                logger.error("Timeout alcanzado." + )
                 logger.debug("1 timeout en socket={}".format(cs))
                 cerrar_conexion(cs)
                 timeout = 1
@@ -273,6 +273,7 @@ def main():
         sock.bind((args.host, args.port))   # !!! bind() takes exactly one argument (2 given)
         # escuchar conexiones entrantes
         sock.listen()
+        print(sock.__getattribute__("raddr"))
         logger.info("Iniciar escucha infinita del servidor web (addr={},port={})".format(args.host, args.port))  # debug
         while(True):
             # se acepta una conexión
