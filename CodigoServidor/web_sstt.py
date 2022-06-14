@@ -199,7 +199,7 @@ def process_web_request(cs, webroot):
             s = r[0]    # el unico posible valor de la lista es el socket. (TODO es lo mismo este socket que cs??? debería no?)
             # print(len(r)) # debug select
             msg = recibir_mensaje(s)
-            if len(msg)>1:
+            if len(msg)>2:
                 logger.debug("Client message: " + msg)
                 lineas = msg.splitlines()    # se divide el mensaje en líneas para que sea más cómodo de manejar
                 print("")
