@@ -199,7 +199,7 @@ def process_web_request(cs, webroot):
             s = r[0]    # el unico posible valor de la lista es el socket. (TODO es lo mismo este socket que cs??? debería no?)
             # print(len(r)) # debug select
             msg = recibir_mensaje(s)
-            if len(msg)>2:
+            if len(msg)>2:  # si no es \r\n
                 logger.debug("Client message: " + msg)
                 lineas = msg.splitlines()    # se divide el mensaje en líneas para que sea más cómodo de manejar
                 print("")
@@ -228,8 +228,8 @@ def process_web_request(cs, webroot):
                         else:   # primera vez que accede al servidor
                             enviar_mensaje(s, heads["url"], 1, 200)
                     
-            else:   # se ha mandado un espacio, que se interpreta como finalizar la conexión
-                logger.error("Conexion finalizada por el usuario.")
+            else:   # se ha mandado un \r\n, que se interpreta como finalizar la conexión
+                logger.error("EL usuario finalizó su comunicación. Cerrando conexión.")
                 cerrar_conexion(cs)
                 timeout = 1 # no es un timeout pero cierra la conexion igual
                 # sys.exit(0)
