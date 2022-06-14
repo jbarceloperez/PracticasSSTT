@@ -221,7 +221,7 @@ def process_web_request(cs, webroot):
                     # Si la cabecera es Cookie comprobar  el valor de cookie_counter para ver si 
                     # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
                     if heads!=-1:
-                        if "Cookie" in heads:
+                        if "Cookie:" in heads:
                             cookie_counter = process_cookies(heads["Cookie"], s)
                             if cookie_counter!=-1:  # si no se ha mandado un mensaje forbidden
                                 enviar_mensaje(s, heads["url"], cookie_counter, 200)
