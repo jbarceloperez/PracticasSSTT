@@ -155,8 +155,8 @@ def check_request(cs, lineas, webroot):
 
         # Analizar las cabeceras. Imprimir cada cabecera y su valor.
         else:   # resto de líneas de la solicitud
-            if len(linea)!=2:   # la linea no tiene el formato correcto
-                enviar_mensaje(cs, "", "", 404)
+            if len(linea)<2:   # la linea no tiene el formato correcto
+                enviar_mensaje(cs, "", "", 400)
                 return -1
 
             if linea[0] in params:  # hay un parámetro repetido, bad request
@@ -165,8 +165,12 @@ def check_request(cs, lineas, webroot):
 
             if linea[0]=="Host:":
                 host = True
-            logger.info(linea[0] + " " + linea[1])
-            params[linea[0]] = linea[1]
+
+            str = ""
+            for i in range(1, len(linea)):
+                str = str + linea[i] + " "
+            logger.info(linea[0] + " " + str)
+            params[linea[0]] = str
 
     if not host:    # si no se incluye la cabecera Host
         enviar_mensaje(cs, "", "", 400)
