@@ -126,6 +126,7 @@ def check_request(cs, lineas, webroot):
     '''
     host = False
     params = {"url": "null"}
+    logger.debug("Lineas de la petición: " + str(len(lineas)))
     for i in range(len(lineas)):
         linea = lineas[i].split()
         if i == 0:   # tratamiento distinto de la primera línea de la solicitud
@@ -162,9 +163,9 @@ def check_request(cs, lineas, webroot):
                 enviar_mensaje(cs, "", "", 400)
                 return -1
 
-            if linea[0]=="Host":
+            if linea[0]=="Host:":
                 host = True
-            logger.info(linea[0] + ": " + linea[1])
+            logger.info(linea[0] + " " + linea[1])
             params[linea[0]] = linea[1]
 
     if not host:    # si no se incluye la cabecera Host
