@@ -187,10 +187,9 @@ def process_web_request(cs, webroot):
     """ Procesamiento principal de los mensajes recibidos.
     """
     # bucle para esperar los datos a través del socket cs con el select()
-    while(True):
-        if cs==-1:  # condición de fin de proceso: el socket se ha cerrado
-            logger.info("Finalizando ejecución socket HTTP")
-            sys.exit(0)
+    timeout = 0
+    while(not timeout):
+
         # el select debe comprobar si el socket cs tiene datos para leer.
         # además se comprueba si hay que cerrar la conexión por un timeout
         r, wsublist, xsublist = select.select([cs],[],[], TIMEOUT_CONNECTION)
@@ -232,6 +231,7 @@ def process_web_request(cs, webroot):
                 logger.error("Timeout alcanzado.")
                 logger.debug("1 timeout en socket={}".format(cs))
                 cerrar_conexion(cs)
+                timeout = 1
                 # sys.exit(0)
 
         # Si es por timeout, se cierra el socket tras el período de persistencia.
@@ -240,6 +240,7 @@ def process_web_request(cs, webroot):
             logger.error("Timeout alcanzado.")
             logger.debug("2 timeout en socket={}".format(cs))
             cerrar_conexion(cs)
+            timeout = 1
 
 
 def main():
