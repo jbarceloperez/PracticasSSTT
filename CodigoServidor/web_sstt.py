@@ -213,9 +213,9 @@ def process_web_request(cs, webroot):
                 else:
                     # se comprueba que la solicitud es correcta y se recogen los argumentos de la solicitud
                     params = check_request(s, lineas, webroot)
-                    e = re.match("\.[a-z]+$", params["url"])
+                    e = re.search("[a-z]+$", params["url"])
                     extension = e.group()
-                    params["filetype_req"] = filetypes[extension.replace(".","")]
+                    params["filetype_req"] = filetypes[extension]
                     # Si la cabecera es Cookie comprobar  el valor de cookie_counter para ver si 
                     # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
                     if params!=-1:

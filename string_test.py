@@ -9,8 +9,8 @@ def main():
     html = "index.html"
     jpg = "logo-um.jpg"
     pattern = '\.[a-z]+$'
-    print(re.match(pattern, html))
-    print(re.match(pattern, jpg))
+    print(re.search(pattern, html))
+    print(re.search(pattern, jpg))
     '''
     s1 = 'HOLA QUE TAL TENGO '
     s2 = " MONEDAS DE PLATA"
