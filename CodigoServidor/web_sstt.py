@@ -166,11 +166,11 @@ def check_request(cs, lineas, webroot):
             if linea[0]=="Host:":
                 host = True
 
-            str = " "
+            aux = " "
             for i in range(1, len(linea)):
-                str = str + linea[i] + " "
-            logger.info(linea[0] + " " + str)
-            params[linea[0]] = str
+                aux = aux + linea[i] + " "
+            logger.info(linea[0] + " " + aux)
+            params[linea[0]] = aux
 
     if not host:    # si no se incluye la cabecera Host
         enviar_mensaje(cs, "", "", 400)
