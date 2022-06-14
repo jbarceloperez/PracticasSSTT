@@ -128,8 +128,7 @@ def check_request(cs, lineas, webroot):
     params = {"url": "null"}
     logger.debug("Lineas de la petición: " + str(len(lineas)))
     for i in range(len(lineas)):
-        if lineas[i]=="":
-            pass
+        print("linea" + lineas[i])
         linea = lineas[i].split()
         if i == 0:   # tratamiento distinto de la primera línea de la solicitud
             if len(linea)!=3:   # la linea no tiene el formato correcto
