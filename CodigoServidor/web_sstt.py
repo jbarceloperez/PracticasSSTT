@@ -97,7 +97,6 @@ def recibir_mensaje(cs):
         Leemos la información que nos llega. recv() devuelve un string con los datos.
     """
     aux = cs.recv(BUFSIZE)  # no es necesario tratar lecturas parciales para este tipo de mensajes entrantes tan pequeños, digo yo
-    # TODO cadena vacía es fin de conexión? manejar eso?
     return aux.decode()
 
 
@@ -196,8 +195,7 @@ def process_web_request(cs, webroot):
         # si hay algo en el conjunto de lectura r, se procesa. Si no, es que ha saltado el timeout.
         if r:
             # Leer los datos con recv.
-            s = r[0]    # el unico posible valor de la lista es el socket. (TODO es lo mismo este socket que cs??? debería no?)
-            # print(len(r)) # debug select
+            s = r[0]    # el unico posible valor de la lista es el socket.
             msg = recibir_mensaje(s)
             if len(msg)>2:  # si no es \r\n
                 logger.debug("Client message: " + msg)
@@ -217,7 +215,6 @@ def process_web_request(cs, webroot):
                     # cerrar_conexion(cs) NO SE DEBE CERRAR EL SOCKET POR PERSISTENCIA, YA SE ENCARGARÁ EL TIMEOUT DE CERRARLO
                 # se comprueba que la solicitud es correcta y se recogen los argumentos de la solicitud
                 else:
-                    print(lineas)
                     heads = check_request(s, lineas, webroot)
                     # Si la cabecera es Cookie comprobar  el valor de cookie_counter para ver si 
                     # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
@@ -274,7 +271,7 @@ def main():
         sock.bind((args.host, args.port))   # !!! bind() takes exactly one argument (2 given)
         # escuchar conexiones entrantes
         sock.listen()
-        logger.info("Iniciar escucha infinita del servidor web (addr={},port={})".format(args.host, args.port))  # debug
+        logger.debug("Iniciar escucha infinita del servidor web (addr={},port={})".format(args.host, args.port))
         while(True):
             # se acepta una conexión
             conn, addr = sock.accept()
