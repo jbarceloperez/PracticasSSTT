@@ -129,7 +129,7 @@ def check_request(cs, lineas, webroot):
     params = {"url": "null"}
     logger.debug("Lineas de la petición: " + str(len(lineas)))
     for i in range(len(lineas)):
-        if i!=len(lineas)-1:   # la última línea es un \r\n, se omite
+        if len(lineas)>1 and i!=len(lineas)-1:   # la última línea es un \r\n, se omite
             linea = lineas[i].split()
             if i == 0:   # tratamiento distinto de la primera línea de la solicitud
                 if len(linea)!=3:   # la linea no tiene el formato correcto
