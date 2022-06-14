@@ -146,7 +146,7 @@ def check_request(cs, lineas, webroot):
             else:
                 params["url"] = linea[1]
             # Construir la ruta absoluta del recurso (webroot + recurso solicitado)
-            path = webroot + linea[1]
+            path = webroot + params["url"]
             # Comprobar que el recurso (fichero) existe, si no devolver Error 404 "Not found"
             if not os.path.isfile(path):
                 enviar_mensaje(cs, "", "", 404)
