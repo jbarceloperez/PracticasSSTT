@@ -146,7 +146,7 @@ def check_request(cs, lineas, webroot):
                 if linea[1]=="/":
                     params["url"] = "index.html"
                 else:
-                    if re.fullmatch("^?[a-zA-Z0-9\/][a-zA-Z0-9_-]\.[a-z]+$", linea[1]):   # elimina las solicitudes de urls no validas
+                    if re.fullmatch("^^[a-zA-Z0-9\/][a-zA-Z0-9_-]*\.[a-z]+$", linea[1]):   # elimina las solicitudes de urls no validas
                         st = linea[1].replace("/","")
                     else:
                         enviar_mensaje(cs, "", "", 400)
