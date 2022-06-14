@@ -228,7 +228,7 @@ def process_web_request(cs, webroot):
                             enviar_mensaje(s, heads["url"], 1, 200)
                     
             else:
-                logger.error("Timeout alcanzado." + )
+                logger.error("Timeout alcanzado.")
                 logger.debug("1 timeout en socket={}".format(cs))
                 cerrar_conexion(cs)
                 timeout = 1
