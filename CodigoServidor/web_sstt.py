@@ -229,7 +229,7 @@ def process_web_request(cs, webroot):
                             enviar_mensaje(s, heads["url"], 1, 200)
                     
             else:   # se ha mandado un \r\n, que se interpreta como finalizar la conexión
-                logger.error("EL usuario finalizó su comunicación. Cerrando conexión.")
+                logger.info("EL usuario finalizó su comunicación. Cerrando conexión.")
                 cerrar_conexion(cs)
                 timeout = 1 # no es un timeout pero cierra la conexion igual
                 # sys.exit(0)
