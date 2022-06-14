@@ -217,6 +217,7 @@ def process_web_request(cs, webroot):
                     # cerrar_conexion(cs) NO SE DEBE CERRAR EL SOCKET POR PERSISTENCIA, YA SE ENCARGARÁ EL TIMEOUT DE CERRARLO
                 # se comprueba que la solicitud es correcta y se recogen los argumentos de la solicitud
                 else:
+                    print(lineas)
                     heads = check_request(s, lineas, webroot)
                     # Si la cabecera es Cookie comprobar  el valor de cookie_counter para ver si 
                     # ha llegado a MAX_ACCESOS y devolver un Error "403 Forbidden"
