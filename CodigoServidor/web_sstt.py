@@ -65,6 +65,7 @@ def enviar_mensaje(cs, p, cookie, codigo):
     """ Esta función envía datos (data) a través del socket cs.
         Devuelve el número de bytes enviados.
     """
+    g = g+4
     # se crea un mensaje en función del código de estado de la respuesta
     if codigo==200:
         path = p
