@@ -18,9 +18,9 @@ import logging      # Para imprimir logs
 
 
 BUFSIZE = 8192 # Tamaño máximo del buffer que se puede utilizar
-TIMEOUT_CONNECTION = 20 # Timout para la conexión persistente
-KEEPALIVE_TIMEOUT = 25  # Timeout HTTP
+TIMEOUT_CONNECTION = 40 # Timout para la conexión persistente
 MAX_ACCESOS = 20
+COOKIE_MAX_AGE = 10     # segundos que durará la cookie desde su creación
 
 # Extensiones admitidas (extension, name in HTTP)
 filetypes = {"gif":"image/gif", "jpg":"image/jpg", "jpeg":"image/jpeg", "png":"image/png", "htm":"text/htm", 
@@ -35,13 +35,13 @@ logger = logging.getLogger()
 def make_header(codigo, tam, cookie):
     '''Crea la cadena de texto con la cabecera de la respuesta en función del código de estado.
     '''
-    aux = '\r\nDate: ' + datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT\r\n') + 'Server: web.rugbycartagena78.org\r\nConnection: Keep-Alive\r\nKeep-Alive: timeout=' + str(KEEPALIVE_TIMEOUT) + '\r\nContent-Length: ' + str(tam) + '\r\nContent-Type: text/html\r\n\r\n'
+    aux = '\r\nDate: ' + datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT\r\n') + 'Server: web.rugbycartagena78.org\r\nConnection: Keep-Alive\r\nKeep-Alive: timeout=' + str(TIMEOUT_CONNECTION) + '\r\nContent-Length: ' + str(tam) + '\r\nContent-Type: text/html\r\n\r\n'
     if codigo==200:     # OK
         # Preparar respuesta con código 200. Construir una respuesta que incluya: la línea de respuesta y
         # las cabeceras Date, Server, Connection, Set-Cookie (para la cookie cookie_counter),
         # Content-Length y Content-Type.
         logger.info("Response: HTTP/1.1 200 OK -> cookie=" + str(cookie))
-        return "HTTP/1.1 200 OK" + "\r\nSet-Cookie: " + str(cookie) + aux
+        return "HTTP/1.1 200 OK" + "\r\nSet-Cookie: " + str(cookie) + "; Max-age=" + COOKIE_MAX_AGE + aux   # la cookie debe expirar a los 2 minutos
     elif codigo==404:   # NOT FOUND
         logger.error("HTTP/1.1 404 NOT FOUND")
         return 'HTTP/1.1 404 Not Found' + aux
