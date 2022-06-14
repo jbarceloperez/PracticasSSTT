@@ -226,17 +226,17 @@ def process_web_request(cs, webroot):
                         else:   # primera vez que accede al servidor
                             enviar_mensaje(s, heads["url"], 1, 200)
                     
-            else:   # se ha mandado un \r\n, que se interpreta como finalizar la conexión
-                logger.info("EL usuario finalizó su comunicación. Cerrando conexión.")
+            else:   # timeout
+                logger.info("Timeout alcanzado.")
+                logger.debug("Timeout en socket={}".format(cs))
                 cerrar_conexion(cs)
-                timeout = 1 # no es un timeout pero cierra la conexion igual
-                # sys.exit(0)
+                timeout = 1
 
         # Si es por timeout, se cierra el socket tras el período de persistencia.
         # NOTA: Si hay algún error, enviar una respuesta de error con una pequeña página HTML que informe del error.
         else:
-            logger.error("Timeout alcanzado.")
-            logger.error("2 timeout en socket={}".format(cs))
+            logger.info("Timeout alcanzado.")
+            logger.debug("Timeout en socket={}".format(cs))
             cerrar_conexion(cs)
             timeout = 1
 
