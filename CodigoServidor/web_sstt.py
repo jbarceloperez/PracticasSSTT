@@ -202,11 +202,11 @@ def process_web_request(cs, webroot):
             if len(msg)>0:
                 logger.debug("Client message: " + msg)
                 lineas = msg.splitlines()    # se divide el mensaje en líneas para que sea más cómodo de manejar
+                logger.info("\nNew Client message: " + lineas[0])
                 # procesar linea a linea que todo el mensaje es correcto
                 '''
                     * Extraer extensión para obtener el tipo de archivo. Necesario para la cabecera Content-Type
-                '''
-                
+                '''                
 
                 linea = lineas[0].split()
                 # Comprobar si es un método GET. Si no devolver un error Error 405 "Method Not Allowed".
