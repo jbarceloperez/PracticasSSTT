@@ -41,7 +41,7 @@ def make_header(codigo, tam, cookie):
         # las cabeceras Date, Server, Connection, Set-Cookie (para la cookie cookie_counter),
         # Content-Length y Content-Type.
         logger.info("Response: HTTP/1.1 200 OK -> cookie=" + str(cookie))
-        return "HTTP/1.1 200 OK" + "\r\nSet-Cookie: " + str(cookie) + "; Max-age=" + COOKIE_MAX_AGE + aux   # la cookie debe expirar a los 2 minutos
+        return "HTTP/1.1 200 OK" + "\r\nSet-Cookie: " + str(cookie) + "; Max-age=" + str(COOKIE_MAX_AGE) + aux   # la cookie debe expirar a los 2 minutos
     elif codigo==404:   # NOT FOUND
         logger.error("HTTP/1.1 404 NOT FOUND")
         return 'HTTP/1.1 404 Not Found' + aux
